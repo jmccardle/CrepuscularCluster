@@ -2,6 +2,8 @@
 
 A creepy, crawly, batch job executor over websockets.
 
+[Watch a full demo on YouTube](https://www.youtube.com/watch?v=EbcG25HSExI)
+
 ## Workloads
 
 a string keyword that matches Generators and Workers together. There's an implicit assumption in the code right now that there will be one generator and any number of workers for a given workload.
