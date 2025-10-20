@@ -4,9 +4,13 @@ A creepy, crawly, batch job executor over websockets.
 
 [Watch a full demo on YouTube](https://www.youtube.com/watch?v=EbcG25HSExI)
 
+## Architecture
+
+Built on Python's `asyncio` and WebSockets for efficient concurrent job distribution.
+
 ## Workloads
 
-a string keyword that matches Generators and Workers together. There's an implicit assumption in the code right now that there will be one generator and any number of workers for a given workload.
+A string keyword that matches Generators and Workers together. Multiple generators can connect for the same workload, with results routed correctly to each generator.
 
 ## Generators
 
@@ -39,9 +43,7 @@ python generator_client.py
 
 Your batches should be executed by the clients!
 
-## Known Bugs
+## Requirements
 
-Generator support is pretty weak. All connected generators will receive responses back, so only connect a single generator for any workload at a time.
-
-There's some async bug that prevents the generator from always perfectly counting the responses received.
-
+- Python 3.7+
+- websockets library: `pip install websockets`
