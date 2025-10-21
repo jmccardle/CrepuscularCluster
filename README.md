@@ -43,7 +43,52 @@ python generator_client.py
 
 Your batches should be executed by the clients!
 
+## Documentation
+
+### Getting Started
+- **[Quick Start](#run-it)** - Get up and running quickly
+- **[Examples](examples/)** - Practical integration examples
+
+### Integration Guides
+- **[Integration Guide](INTEGRATION.md)** - How to integrate CrepuscularCluster into your applications
+  - Custom generators for your workflows
+  - Custom workers that execute Python functions
+  - Embedding the cluster in your applications
+  - Best practices and patterns
+
+### Reference Documentation
+- **[API Documentation](API.md)** - Complete WebSocket protocol reference
+  - Message formats
+  - Connection lifecycle
+  - Error handling
+  - Best practices
+
+- **[Architecture Overview](ARCHITECTURE.md)** - Design deep-dive
+  - Component architecture
+  - Concurrency model
+  - Data flow diagrams
+  - Performance considerations
+
 ## Requirements
 
 - Python 3.7+
 - websockets library: `pip install websockets`
+
+## Use Cases
+
+CrepuscularCluster is ideal for:
+- **Batch Processing** - Distribute computational tasks across multiple machines
+- **Parallel Workflows** - Process large datasets in parallel
+- **Development Testing** - Test distributed systems locally
+- **Education** - Learn about distributed systems and async Python
+
+## Features
+
+- ✅ WebSocket-based communication
+- ✅ Async/await architecture
+- ✅ Multi-core worker support
+- ✅ Multiple generators per workload
+- ✅ Real-time progress monitoring
+- ✅ Automatic job reassignment on worker failure
+- ✅ Simple integration into existing applications
+
