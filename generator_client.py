@@ -20,14 +20,16 @@ async def generator_client():
 
         # Track remaining jobs
         remaining_batches = len(batches)
+        completed_batches = 0
 
-        # Listen for results
+        # Listen for results (now pushed from server)
         while remaining_batches > 0:
             response = json.loads(await websocket.recv())
-            print(f"Result ({remaining_batches - len(batches)}): {response}")
+            completed_batches += 1
+            print(f"Result ({completed_batches}/{len(batches)}): {response}")
             remaining_batches -= 1
 
-        print("All batches solved. Exiting.")
+        print("All batches completed. Exiting.")
 
 if __name__ == "__main__":
     asyncio.run(generator_client())

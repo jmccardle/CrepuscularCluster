@@ -15,8 +15,7 @@ WORKLOAD_NAME = sys.argv[1]
 EXECUTABLE = sys.argv[2]
 NUM_CORES = int(sys.argv[3])
 
-task_queue = Queue()  # Holds jobs to be executed
-active_threads = set()  # Track running threads
+result_queue = Queue()  # Bridge between threads and async loop
 
 async def worker_client():
     uri = "ws://localhost:8765"
@@ -27,26 +26,35 @@ async def worker_client():
         await websocket.send(json.dumps(registration))
         print(f"Registered as Worker for {WORKLOAD_NAME} with {NUM_CORES} cores.")
 
-        while True:
-            # If we have available cores, request new work
-            #if task_queue.qsize() < NUM_CORES:
-            #    await websocket.send(json.dumps({"request_work": True}))
+        # Create task to send results from queue
+        send_task = asyncio.create_task(result_sender(websocket))
 
-            # Wait for a job assignment
-            response = json.loads(await websocket.recv())
+        try:
+            while True:
+                # Wait for a job assignment
+                response = json.loads(await websocket.recv())
 
-            if "batch" in response:
-                args = response["batch"]
-                print(f"Received batch: {args}")
-                task_queue.put(args)
-                threading.Thread(target=process_batch, args=(websocket, args), daemon=True).start()
-            else:
-                await asyncio.sleep(0.1)  # No work available, wait
+                if "batch" in response:
+                    args = response["batch"]
+                    print(f"Received batch: {args}")
+                    threading.Thread(target=process_batch, args=(args,), daemon=True).start()
+                else:
+                    await asyncio.sleep(0.1)  # No work available, wait
+        finally:
+            send_task.cancel()
 
-def process_batch(websocket, args):
-    """Executes the given batch in a subprocess and sends the result."""
-    global active_threads
+async def result_sender(websocket):
+    """Async task that sends results from the queue."""
+    while True:
+        # Check queue periodically
+        if not result_queue.empty():
+            result = result_queue.get()
+            await websocket.send(json.dumps(result))
+            print(f"Sent result: Exit {result['exitcode']}")
+        await asyncio.sleep(0.01)  # Small delay to prevent busy-waiting
 
+def process_batch(args):
+    """Executes the given batch in a subprocess (runs in thread)."""
     cmd = [sys.executable, EXECUTABLE] + args
     print(f"Executing: {' '.join(cmd)}")
 
@@ -59,14 +67,8 @@ def process_batch(websocket, args):
         "exitcode": proc.returncode
     }
 
-    asyncio.run(send_result(websocket, result))
+    result_queue.put(result)  # Thread-safe queue.put()
     print(f"Completed batch {args}: Exit {proc.returncode}")
-
-    active_threads.discard(threading.current_thread())
-
-async def send_result(websocket, result):
-    """Sends the completed batch result back to the server."""
-    await websocket.send(json.dumps(result))
 
 if __name__ == "__main__":
     asyncio.run(worker_client())
